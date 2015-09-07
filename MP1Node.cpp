@@ -1,6 +1,6 @@
 /**********************************
  * FILE NAME: MP1Node.cpp
- *
+ *LENGOCKHANH-DHTH8C
  * DESCRIPTION: Membership protocol run by this Node.
  * 				Definition of MP1Node class functions.
  **********************************/
@@ -162,6 +162,7 @@ int MP1Node::introduceSelfToGroup(Address *joinaddr) {
 int MP1Node::finishUpThisNode(){
    /*
     * Your code goes here
+     CODE VIET O DAY 1
     */
 }
 
@@ -217,6 +218,7 @@ void MP1Node::checkMessages() {
 bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 	/*
 	 * Your code goes here
+     CODE VIET O DAY 2
 	 */
 }
 
@@ -231,6 +233,7 @@ void MP1Node::nodeLoopOps() {
 
 	/*
 	 * Your code goes here
+      CODE VIET O DAY 3
 	 */
 
     return;
