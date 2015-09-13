@@ -17,7 +17,8 @@
  * is necessary for your logic to work
  */
 MP1Node::MP1Node(Member *member, Params *params, EmulNet *emul, Log *log, Address *address) {
-	for( int i = 0; i < 6; i++ ) {
+	for( int i = 0; i < 6; i++ ) 
+    {
 		NULLADDR[i] = 0;
 	}
 	this->memberNode = member;
@@ -72,12 +73,13 @@ void MP1Node::nodeStart(char *servaddrstr, short servport) {
     if( initThisNode(&joinaddr) == -1 ) {
 #ifdef DEBUGLOG
         log->LOG(&memberNode->addr, "init_thisnode failed. Exit.");
+        //ghi ra file noi dung loi
 #endif
         exit(1);
     }
 
     if( !introduceSelfToGroup(&joinaddr) ) {
-        finishUpThisNode();
+        finishUpThisNode(&joinaddr);//neu khai bao khong hoan thanh thi loai no ra
 #ifdef DEBUGLOG
         log->LOG(&memberNode->addr, "Unable to join self to group. Exiting.");
 #endif
@@ -159,11 +161,25 @@ int MP1Node::introduceSelfToGroup(Address *joinaddr) {
  *
  * DESCRIPTION: Wind up this node and clean up state
  */
-int MP1Node::finishUpThisNode(){
+int MP1Node::finishUpThisNode(Address *joinaddr){
    /*
     * Your code goes here
      CODE VIET O DAY 1
     */
+    memberNode->inGroup = false;
+   
+    memberNode->nnb = 0;
+    memberNode->heartbeat = 0;
+    memberNode->pingCounter = TFAIL;
+    memberNode->timeOutCounter = -1;
+
+    
+    #ifdef DEBUGLOG
+        log->LOG(&memberNode->addr, " ****** delete state out list ******");
+    #endif
+    // initMemberListTable(Member *memberNode)
+    // initMemberListTable(memberNode);
+
 }
 
 /**
@@ -204,7 +220,7 @@ void MP1Node::checkMessages() {
     while ( !memberNode->mp1q.empty() ) {
     	ptr = memberNode->mp1q.front().elt;
     	size = memberNode->mp1q.front().size;
-    	memberNode->mp1q.pop();
+    	       memberNode->mp1q.pop();
     	recvCallBack((void *)memberNode, (char *)ptr, size);
     }
     return;
@@ -220,6 +236,7 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 	 * Your code goes here
      CODE VIET O DAY 2
 	 */
+     if(&env->MsgTypes)
 }
 
 /**
