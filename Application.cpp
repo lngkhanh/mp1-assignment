@@ -46,19 +46,21 @@ int main(int argc, char *argv[]) {
  */
 Application::Application(char *infile) {
 	int i;
-	par = new Params();
-	srand (time(NULL));
-	par->setparams(infile);
-	log = new Log(par);
-	en = new EmulNet(par);
-	mp1 = (MP1Node **) malloc(par->EN_GPSZ * sizeof(MP1Node *));
+	par = new Params();	//goi ham Parameter khoi tao.
+	srand (time(NULL));		// random ngau nhieu thoi gian.
+	par->setparams(infile);	// Goi function setparams truyen vao Infile.-> tao ra gia tri:
+							//	MAX_NNB, SINGLE_FAILURE, DROP_MSG, MSG_DROP_PROB,allNodesJoined=10;EN_GPSZ=10.
+	log = new Log(par);		// khoi tao log voi params.
+	en = new EmulNet(par);	// khoi tao Emunet voi params.
+
+	mp1 = (MP1Node **) malloc(par->EN_GPSZ * sizeof(MP1Node *));	// cap phat bo nho cho mp1 voi kich thuot la 10.
 
 	/*
 	 * Init all nodes
 	 */
-	for( i = 0; i < par->EN_GPSZ; i++ ) {
-		Member *memberNode = new Member;
-		memberNode->inited = false;
+	for( i = 0; i < par->EN_GPSZ; i++ ) {	// for i=0.....10.
+		Member *memberNode = new Member;	// khoi tao member
+		memberNode->inited = false;			
 		Address *addressOfMemberNode = new Address();
 		Address joinaddr;
 		joinaddr = getjoinaddr();
@@ -96,7 +98,8 @@ int Application::run()
 	srand(time(NULL));
 
 	// As time runs along
-	for( par->globaltime = 0; par->globaltime < TOTAL_RUNNING_TIME; ++par->globaltime ) {
+	for( par->globaltime = 0; par->globaltime < TOTAL_RUNNING_TIME; ++par->globaltime ) 
+	{
 		// Run the membership protocol
 		mp1Run();
 		// Fail some nodes

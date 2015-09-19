@@ -12,7 +12,8 @@
 /**
  * CLASS NAME: q_elt
  *
- * DESCRIPTION: Entry in the queue
+ * DESCRIPTION: Entry in the Queue
+ 	// nap vao hang doi.
  */
 class q_elt {
 public:

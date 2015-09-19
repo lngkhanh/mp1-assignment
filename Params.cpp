@@ -24,7 +24,11 @@ void Params::setparams(char *config_file) {
 	fscanf(fp,"\nDROP_MSG: %d", &DROP_MSG);
 	fscanf(fp,"\nMSG_DROP_PROB: %lf", &MSG_DROP_PROB);
 
-	//printf("Parameters of the test case: %d %d %d %lf\n", MAX_NNB, SINGLE_FAILURE, DROP_MSG, MSG_DROP_PROB);
+	//printf("\n[Params.CPP-lngkhanh] Parameters of the test case: %d - %d - %d - %lf\n\n", MAX_NNB, SINGLE_FAILURE, DROP_MSG, MSG_DROP_PROB);
+	printf("[lngkhanh]-MAX_NNB= %d\n", MAX_NNB);
+	printf("[lngkhanh]-SINGLE_FAILURE= %d\n",SINGLE_FAILURE );
+	printf("[lngkhanh]-DROP_MSG= %d\n", DROP_MSG);
+	printf("[lngkhanh]-MSG_DROP_PROB= %lf\n\n", MSG_DROP_PROB);
 
 	EN_GPSZ = MAX_NNB;
 	STEP_RATE=.25;
