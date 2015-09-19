@@ -58,7 +58,8 @@ private:
 
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
-	Member * getMemberNode() {
+	Member * getMemberNode()
+	{
 		return memberNode;
 	}
 	int recvLoop();
