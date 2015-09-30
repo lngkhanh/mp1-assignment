@@ -234,28 +234,28 @@ bool MP1Node::recvCallBack(void *env, char *data, unsigned int size ) {
     
     //Copy the received data after typecasting into MessageHdr type into a local msg
     MessageHdr* msg = (MessageHdr*) data;
-    Address *src_addr = (Address*)(msg+1);
+    Address *source_addr = (Address*)(msg+1);
     
     size -= sizeof(MessageHdr) + sizeof(Address) + 1;
     data += sizeof(MessageHdr) + sizeof(Address) + 1;
     
     switch (msg->msgType) {
         case JOINREQ:
-            JoinHandler(src_addr, data, size);
-            HeartbeatHandler(src_addr, data, size);
+            JoinHandler(source_addr, data, size);
+            HeartbeatHandler(source_addr, data, size);
             break;
         case JOINREP:
         {
             memberNode->inGroup = 1;
             stringstream msg;
-            msg << "Received JOINREP from the node " <<  src_addr->getAddress();
+            msg << "Received JOINREP from the node " <<  source_addr->getAddress();
             msg << " data " << *(long*)(data );
             log->LOG(&memberNode->addr, msg.str().c_str());
-            HeartbeatHandler(src_addr, data, size);
+            HeartbeatHandler(source_addr, data, size);
             break;
         }
         case PINGRANDOM:
-            HeartbeatHandler(src_addr, data, size);
+            HeartbeatHandler(source_addr, data, size);
             break;
         default:
             log->LOG(&memberNode->addr, "Received some invalid message");
@@ -411,31 +411,31 @@ void MP1Node::LogMembershipList() {
 }
 
 /*Send ping to random member*/
-void MP1Node::SendHBToRandMember(Address *src_addr, long heartbeat) {
+void MP1Node::SendHBToRandMember(Address *source_addr, long heartbeat) {
  
-    double prob = k / (double)memberNode->memberList.size();
+    double uutien = k / (double)memberNode->memberList.size();
     
     MessageHdr *msg;
     
-    size_t msgsize = sizeof(MessageHdr) + sizeof(src_addr->addr) + sizeof(long) + 1;
+    size_t msgsize = sizeof(MessageHdr) + sizeof(source_addr->addr) + sizeof(long) + 1;
     msg = (MessageHdr *) malloc(msgsize * sizeof(char));
     
     // create JOINREQ message
     msg->msgType = PINGRANDOM;
-    memcpy((char *)(msg+1), src_addr->addr, sizeof(src_addr->addr));
-    memcpy((char *)(msg+1) + sizeof(src_addr->addr) + 1, &heartbeat, sizeof(long));
+    memcpy((char *)(msg+1), source_addr->addr, sizeof(source_addr->addr));
+    memcpy((char *)(msg+1) + sizeof(source_addr->addr) + 1, &heartbeat, sizeof(long));
     
     for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
         Address dst_addr = AddressFromMLE(&(*it));
         
         /*Check the list member is not the member itself*/
         if ((dst_addr == memberNode->addr) == 0 ||
-            ((dst_addr == *src_addr) == 0)) {
+            ((dst_addr == *source_addr) == 0)) {
             continue;
         }
         
         /*Send message based on the probability*/
-        if ((((double)(rand() % 100))/100) < prob) {
+        if ((((double)(rand() % 100))/100) < uutien) {
             emulNet->ENsend(&memberNode->addr, &dst_addr, (char *)msg, msgsize);
         }
     }

@@ -20,10 +20,9 @@
  */
 #define TREMOVE 20
 #define TFAIL 5
+#define k 30
 
-/*
- * Note: You can change/add any functions in MP1Node.{h,cpp}
- */
+
 
 /**
  * Message Types
@@ -31,6 +30,7 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
+    PINGRANDOM,
     DUMMYLASTMSGTYPE
 };
 
@@ -40,7 +40,7 @@ enum MsgTypes{
  * DESCRIPTION: Header and content of a message
  */
 typedef struct MessageHdr {
-	enum MsgTypes msgType;
+    enum MsgTypes msgType;
 }MessageHdr;
 
 /**
@@ -50,33 +50,38 @@ typedef struct MessageHdr {
  */
 class MP1Node {
 private:
-	EmulNet *emulNet;
-	Log *log;
-	Params *par;
-	Member *memberNode;
-	char NULLADDR[6];
-
+    EmulNet *emulNet;
+    Log *log;
+    Params *par;
+    Member *memberNode;
+    char NULLADDR[6];
+    
+    void HeartbeatHandler(Address*, void*, size_t);
+    void JoinHandler(Address*, void*, size_t);
+    
 public:
-	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
-	Member * getMemberNode()
-	{
-		return memberNode;
-	}
-	int recvLoop();
-	static int enqueueWrapper(void *env, char *buff, int size);
-	void nodeStart(char *servaddrstr, short serverport);
-	int initThisNode(Address *joinaddr);
-	int introduceSelfToGroup(Address *joinAddress);
-	int finishUpThisNode();
-	void nodeLoop();
-	void checkMessages();
-	bool recvCallBack(void *env, char *data, int size);
-	void nodeLoopOps();
-	int isNullAddress(Address *addr);
-	Address getJoinAddress();
-	void initMemberListTable(Member *memberNode);
-	void printAddress(Address *addr);
-	virtual ~MP1Node();
+    MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
+    Member * getMemberNode() {
+        return memberNode;
+    }
+    int recvLoop();
+    static int enqueueWrapper(void *env, char *buff, int size);
+    void nodeStart(char *servaddrstr, short serverport);
+    int initThisNode(Address *joinaddr);
+    int introduceSelfToGroup(Address *joinAddress);
+    int finishUpThisNode();
+    void nodeLoop();
+    void checkMessages();
+    bool recvCallBack(void *env, char *data, unsigned int size);
+    void nodeLoopOps();
+    int isNullAddress(Address *addr);
+    Address getJoinAddress();
+    void initMemberListTable(Member *memberNode, int, short);
+    void printAddress(Address *addr);
+    virtual ~MP1Node();
+    void LogMembershipList();
+    void SendHBToRandMember(Address*, long);
+    bool UpdateMembershipList(Address*, long);
 };
 
 #endif /* _MP1NODE_H_ */
