@@ -2,7 +2,7 @@
  * FILE NAME: MP1Node.cpp
  *
  * DESCRIPTION: Membership protocol run by this Node.
- *              Definition of MP1Node class functions.
+ * 				Definition of MP1Node class functions.
  **********************************/
 
 #include <sstream>
@@ -37,7 +37,7 @@ MP1Node::~MP1Node() {}
  * FUNCTION NAME: recvLoop
  *
  * DESCRIPTION: This function receives message from the network and pushes into the queue
- *              This function is called by a node to receive messages currently waiting for it
+ * 				This function is called by a node to receive messages currently waiting for it
  */
 int MP1Node::recvLoop() {
     if ( memberNode->bFailed ) {
@@ -62,8 +62,8 @@ int MP1Node::enqueueWrapper(void *env, char *buff, int size) {
  * FUNCTION NAME: nodeStart
  *
  * DESCRIPTION: This function bootstraps the node
- *              All initializations routines for a member.
- *              Called by the application layer.
+ * 				All initializations routines for a member.
+ * 				Called by the application layer.
  */
 void MP1Node::nodeStart(char *servaddrstr, short servport) {
     Address joinaddr;
@@ -167,7 +167,7 @@ int MP1Node::finishUpThisNode(){
         //free(memberNode->memberList);
         //free(memberNode->mp1q);
         free(memberNode);
-    memberNode->inGroup =0;
+	memberNode->inGroup =0;
     }
     return 0;
 }
@@ -178,7 +178,7 @@ int MP1Node::finishUpThisNode(){
  * FUNCTION NAME: nodeLoop
  *
  * DESCRIPTION: Executed periodically at each member
- *              Check your messages in queue and perform membership protocol duties
+ * 				Check your messages in queue and perform membership protocol duties
  */
 void MP1Node::nodeLoop() {
     if (memberNode->bFailed) {
@@ -239,23 +239,25 @@ bool MP1Node::recvCallBack(void *env, char *data, unsigned int size ) {
     size -= sizeof(MessageHdr) + sizeof(Address) + 1;
     data += sizeof(MessageHdr) + sizeof(Address) + 1;
     
-    switch (msg->msgType) {
+    switch (msg->msgType) 
+    {
         case JOINREQ:
-            JoinHandler(source_addr, data, size);
-            HeartbeatHandler(source_addr, data, size);
+            // xu ly join req
+            join_req(source_addr, data, size);
+            heartbeat_check(source_addr, data, size);
             break;
         case JOINREP:
         {
             memberNode->inGroup = 1;
             stringstream msg;
-            msg << "Received JOINREP from the node " <<  source_addr->getAddress();
+            msg << "Nhan JOINREQ Tu Node : " <<  source_addr->getAddress();
             msg << " data " << *(long*)(data );
             log->LOG(&memberNode->addr, msg.str().c_str());
-            HeartbeatHandler(source_addr, data, size);
+            heartbeat_check(source_addr, data, size);
             break;
         }
         case PINGRANDOM:
-            HeartbeatHandler(source_addr, data, size);
+            heartbeat_check(source_addr, data, size);
             break;
         default:
             log->LOG(&memberNode->addr, "Received some invalid message");
@@ -272,7 +274,7 @@ Address AddressFromMLE(MemberListEntry* mle) {
 }
 
 /*Handler that can be invoked on reception of a JOINREQ message*/
-void MP1Node::JoinHandler(Address* addr, void* data, size_t size) {
+void MP1Node::join_req(Address* addr, void* data, size_t size) {
     MessageHdr* msg;
     size_t msgsize = sizeof(MessageHdr) + sizeof(memberNode->addr) + sizeof(long) + 1;
     msg = (MessageHdr *) malloc(msgsize * sizeof(char));
@@ -281,23 +283,26 @@ void MP1Node::JoinHandler(Address* addr, void* data, size_t size) {
     memcpy((char *)(msg+1), &memberNode->addr, sizeof(memberNode->addr));
     memcpy((char *)(msg+1) + sizeof(memberNode->addr) + 1, &memberNode->heartbeat, sizeof(long));
     
-    stringstream ss;
-    ss<< "Sending JOINREP to node" << addr->getAddress() <<" heartbeat "<<memberNode->heartbeat;
-    log->LOG(&memberNode->addr, ss.str().c_str());
-    emulNet->ENsend(&memberNode->addr, addr, (char *)msg, msgsize);
-    free(msg);
+	stringstream ss;
+	ss<< "Gui JOINREP toi node" << addr->getAddress() <<" heartbeat "<<memberNode->heartbeat;
+	log->LOG(&memberNode->addr, ss.str().c_str());
+    // send emulnet
+	emulNet->ENsend(&memberNode->addr, addr, (char *)msg, msgsize);
+	free(msg);
 }
 
 /*Handler function that can be invoked on reception of a HeartBeat message*/
-void MP1Node::HeartbeatHandler(Address* addr, void* data, size_t size) {
+void MP1Node::heartbeat_check(Address* addr, void* data, size_t size) {
     std::stringstream msg;
-    assert(size >= sizeof(long));
-    long *heartbeat = (long*)data;
     
-    bool newData = UpdateMembershipList(addr, *heartbeat);
-    if (newData) {
-        LogMembershipList();
-        SendHBToRandMember(addr, *heartbeat);
+    long *heartbeat = (long*)data;
+    //kiem tra co trong ds ko
+    bool check = UpdateMembershipList(addr, *heartbeat);
+    if (check) {
+        //ghi log
+        loglist();
+        // send ngau nien addr
+        send_random(addr, *heartbeat);
     }
 }
 
@@ -327,8 +332,8 @@ bool MP1Node::UpdateMembershipList(Address *addr, long heartbeat)  {
  * FUNCTION NAME: nodeLoopOps
  *
  * DESCRIPTION: Check if any node hasn't responded within a timeout period and then delete
- *              the nodes
- *              Propagate your membership list
+ * 				the nodes
+ * 				Propagate your membership list
  */
 void MP1Node::nodeLoopOps() {
     int timeout = 5;
@@ -349,15 +354,15 @@ void MP1Node::nodeLoopOps() {
             }
             memberNode->memberList.resize(memberNode->memberList.size()-1);
             it -= 1;
-            LogMembershipList();
+            loglist();
             log->logNodeRemove(&memberNode->addr, &addr);
         }
-    }
+	}
     
     /*Update Membership list based on the changes done above*/
     UpdateMembershipList(&memberNode->addr, ++memberNode->heartbeat);
     
-    SendHBToRandMember(&memberNode->addr,
+    send_random(&memberNode->addr,
                        memberNode->heartbeat);
     return;
 }
@@ -399,24 +404,25 @@ void MP1Node::initMemberListTable(Member *memberNode, int id, short port) {
     memberNode->memberList.push_back(mle);
 }
 
-void MP1Node::LogMembershipList() {
-    stringstream msg;
-    msg << "[";
-    for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
-        /*Log the membership list for all the elements of MLE*/
-        msg << it->getid() << ": " << it->getheartbeat() << "(" << it->gettimestamp() << "), ";
-    }
-    msg << "]";
+void MP1Node::loglist() {
+	stringstream msg;
+	msg << "[";
+	for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+		/*Log the membership list for all the elements of MLE*/
+		msg << it->getid() << ": " << it->getheartbeat() << "(" << it->gettimestamp() << "), ";
+	}
+	msg << "]";
     
 }
 
 /*Send ping to random member*/
-void MP1Node::SendHBToRandMember(Address *source_addr, long heartbeat) {
+void MP1Node::send_random(Address *source_addr, long heartbeat) 
+{
  
-    double uutien = k / (double)memberNode->memberList.size();
+	double uutien = k / (double)memberNode->memberList.size();
     
-    MessageHdr *msg;
-    
+	MessageHdr *msg;
+	
     size_t msgsize = sizeof(MessageHdr) + sizeof(source_addr->addr) + sizeof(long) + 1;
     msg = (MessageHdr *) malloc(msgsize * sizeof(char));
     
@@ -425,7 +431,7 @@ void MP1Node::SendHBToRandMember(Address *source_addr, long heartbeat) {
     memcpy((char *)(msg+1), source_addr->addr, sizeof(source_addr->addr));
     memcpy((char *)(msg+1) + sizeof(source_addr->addr) + 1, &heartbeat, sizeof(long));
     
-    for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+	for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
         Address dst_addr = AddressFromMLE(&(*it));
         
         /*Check the list member is not the member itself*/
@@ -434,11 +440,11 @@ void MP1Node::SendHBToRandMember(Address *source_addr, long heartbeat) {
             continue;
         }
         
-        /*Send message based on the probability*/
+        // send msg theo ti le uu tien
         if ((((double)(rand() % 100))/100) < uutien) {
             emulNet->ENsend(&memberNode->addr, &dst_addr, (char *)msg, msgsize);
         }
-    }
+	}
     free(msg);
 }
 

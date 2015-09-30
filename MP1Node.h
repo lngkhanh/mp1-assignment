@@ -56,8 +56,8 @@ private:
     Member *memberNode;
     char NULLADDR[6];
     
-    void HeartbeatHandler(Address*, void*, size_t);
-    void JoinHandler(Address*, void*, size_t);
+    void heartbeat_check(Address*, void*, size_t);
+    void join_req(Address*, void*, size_t);
     
 public:
     MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
@@ -79,8 +79,8 @@ public:
     void initMemberListTable(Member *memberNode, int, short);
     void printAddress(Address *addr);
     virtual ~MP1Node();
-    void LogMembershipList();
-    void SendHBToRandMember(Address*, long);
+    void loglist();
+    void send_random(Address*, long);
     bool UpdateMembershipList(Address*, long);
 };
 
