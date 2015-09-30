@@ -155,7 +155,7 @@ void Application::mp1Run() {
 		 */
 		if( par->getcurrtime() == (int)(par->STEP_RATE*i) ) // khi currenttime =0,1,2; i=0,4,8
 		{
-
+		// bang nhau khi currtime=0,1,2; i=[3210][7654][98] 
 		// printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		// printf("getcurrtime= %d; STEPRATE =%d,; i= %d; (STEPRATE*i)= %d", par->getcurrtime(),(int)par->STEP_RATE,i,(int)par->STEP_RATE*i);
 		// printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -171,6 +171,7 @@ void Application::mp1Run() {
 		 */
 		else if( par->getcurrtime() > (int)(par->STEP_RATE*i) && !(mp1[i]->getMemberNode()->bFailed) ) 
 		{
+			// 
 			// handle messages and send heartbeats
 			mp1[i]->nodeLoop();
 			#ifdef DEBUGLOG
